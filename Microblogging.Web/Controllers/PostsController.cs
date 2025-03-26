@@ -54,7 +54,7 @@ namespace Microblogging.Web.Controllers
             }
         }
 
-        internal int GetHeaderValue(string header, int defaultValue)
+        public int GetHeaderValue(string header, int defaultValue)
         {
             if (Request.Headers.TryGetValue(header, out var value) &&
                 int.TryParse(value, out var intValue))
@@ -80,12 +80,12 @@ namespace Microblogging.Web.Controllers
             }
             return View(model);
         }
-        internal double GenerateRandomCoordinate()
+        public double GenerateRandomCoordinate()
         {
             var random = new Random();
             return random.NextDouble() * 180 - 90;
         }
-        internal string GetOptimalImageUrl(Post post, int screenWidth, int screenHeight)
+        public string GetOptimalImageUrl(Post post, int screenWidth, int screenHeight)
         {
             if (string.IsNullOrEmpty(post.OriginalImageUrl))
                 return null;
