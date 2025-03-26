@@ -38,7 +38,7 @@ public class AccountController : Controller
             // Hardcoded users for demonstration
             var users = new Dictionary<string, string>
             {
-                {"user1", "password1"},
+                {"admin", "p@sword"},
               
             };
 
