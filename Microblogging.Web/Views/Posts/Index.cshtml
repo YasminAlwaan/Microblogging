@@ -1,4 +1,5 @@
-﻿<!-- Views/Posts/Index.cshtml -->
+﻿@using Microblogging.Core.Models
+<!-- Views/Posts/Index.cshtml -->
 @model IEnumerable<Post>
 
 <h2>Timeline</h2>
@@ -17,3 +18,20 @@
         <small>@post.CreatedAt.ToString("g")</small>
     </div>
 }
+<script>
+    // Client-side code will handle all data fetching
+    const token = '@ViewBag.JwtToken';
+
+    async function loadPosts() {
+        const response = await fetch('/api/posts', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-Screen-Width': window.screen.width,
+                'X-Screen-Height': window.screen.height
+            }
+        });
+        // ... render posts
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPosts);
+</script>

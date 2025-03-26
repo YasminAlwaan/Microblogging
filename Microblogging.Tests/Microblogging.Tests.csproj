@@ -11,6 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="FluentAssertions" Version="8.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -18,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microblogging.Core\Microblogging.Core.csproj" />
     <ProjectReference Include="..\Microblogging.Data\Microblogging.Data.csproj" />
+    <ProjectReference Include="..\Microblogging.Jobs\Microblogging.Jobs.csproj" />
     <ProjectReference Include="..\Microblogging.Web\Microblogging.Web.csproj" />
   </ItemGroup>
 

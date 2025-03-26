@@ -1,66 +1,83 @@
-﻿using Microblogging.Data;
-using Microsoft.AspNetCore.Authorization;
+﻿// Controllers/AccountController.cs
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using System.Text;
+using Microblogging.Web.Models;
+using Microblogging.Data;
+using Microsoft.AspNetCore.Authorization;
 
-namespace Microblogging.Web.Controllers
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    private readonly IConfiguration _config;
+    private readonly IRepository _repository;
+
+    public AccountController(IConfiguration config, IRepository repository)
     {
-        private readonly IConfiguration _config;
-        private readonly IRepository _repository;
+        _config = config;
+        _repository = repository;
+    }
 
-        public AccountController(IConfiguration config, IRepository repository)
-        {
-            _config = config;
-            _repository = repository;
-        }
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Login()
+    {
+        return View();
+    }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginModel model)
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginModel model)
+    {
+        if (ModelState.IsValid)
         {
             // Hardcoded users for demonstration
             var users = new Dictionary<string, string>
-        {
-            {"user1", "password1"},
-            {"user2", "password2"}
-        };
+            {
+                {"user1", "password1"},
+                {"user2", "password2"}
+            };
 
             if (users.TryGetValue(model.Username, out var password) &&
                 password == model.Password)
             {
-                var claims = new[]
+                var claims = new List<Claim>
                 {
-                new Claim(ClaimTypes.NameIdentifier, "1"),
-                new Claim(ClaimTypes.Name, model.Username)
-            };
+                    new Claim(ClaimTypes.NameIdentifier, model.Username),
+                    new Claim(ClaimTypes.Name, model.Username)
+                };
 
-                var key = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var identity = new ClaimsIdentity(claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
 
-                var token = new JwtSecurityToken(
-                    issuer: _config["Jwt:Issuer"],
-                    audience: _config["Jwt:Audience"],
-                    claims: claims,
-                    expires: DateTime.Now.AddMinutes(30),
-                    signingCredentials: creds);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = model.RememberMe
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    authProperties);
 
                 return RedirectToAction("Index", "Posts");
             }
 
-            ModelState.AddModelError("", "Invalid login attempt");
-            return View(model);
+            ModelState.AddModelError(string.Empty, "Invalid login attempt");
         }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme);
+
+        return RedirectToAction("Index", "Home");
     }
 }

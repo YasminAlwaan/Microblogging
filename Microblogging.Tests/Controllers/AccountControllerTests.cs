@@ -3,6 +3,9 @@ using Microblogging.Web.Controllers;
 using Xunit;
 using Microblogging.Data;
 using Moq;
+using Microsoft.Extensions.Configuration;
+
+using Microblogging.Web.Models;
 
 namespace Microblogging.Tests.Controllers
 {

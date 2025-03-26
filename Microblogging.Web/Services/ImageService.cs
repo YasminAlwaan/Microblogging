@@ -1,4 +1,6 @@
 ﻿using Hangfire;
+using Microblogging.Core.Interfaces;
+using Microblogging.Core.Models;
 
 namespace Microblogging.Web.Services
 {

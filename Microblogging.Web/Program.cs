@@ -1,6 +1,12 @@
+using Microblogging.Core;
+using Microblogging.Core.Interfaces;
 using Microblogging.Data;
+using Microblogging.Jobs;
 using Microblogging.Web.Services;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,6 +25,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -26,7 +33,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddSingleton<IImageStorage, AzureBlobStorage>();
-
+builder.Services.AddScoped<IImageProcessor, ImageProcessor>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IRepository, Repository>();
 
 var app = builder.Build();

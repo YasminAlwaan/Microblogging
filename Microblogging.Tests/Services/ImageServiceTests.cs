@@ -2,6 +2,8 @@
 using Microblogging.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Xunit;
+using Microsoft.AspNetCore.Hosting;
+using Microblogging.Core.Interfaces;
 
 namespace Microblogging.Tests.Services
 {

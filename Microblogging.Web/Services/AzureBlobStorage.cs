@@ -1,11 +1,9 @@
 ﻿using Azure.Storage.Blobs;
+using Microblogging.Core.Interfaces;
 
 namespace Microblogging.Web.Services
 {
-    public interface IImageStorage
-    {
-        Task<string> StoreImage(Stream imageStream, string fileName);
-    }
+  
 
     public class AzureBlobStorage : IImageStorage
     {

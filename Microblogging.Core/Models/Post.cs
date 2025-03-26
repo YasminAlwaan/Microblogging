@@ -24,5 +24,6 @@ namespace Microblogging.Core.Models
 
         public int UserId { get; set; }
         public User User { get; set; }
+        public Dictionary<string, string> ProcessedImageUrls { get; set; } = new();
     }
 }
