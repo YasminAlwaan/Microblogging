@@ -1,37 +1,54 @@
-﻿@using Microblogging.Core.Models
-<!-- Views/Posts/Index.cshtml -->
-@model IEnumerable<Post>
+﻿@{
+    ViewData["Title"] = "Posts";
+}
 
 <h2>Timeline</h2>
+<div id="postsContainer"></div>
 
-@foreach (var post in Model)
-{
-    <div class="post">
-        <h4>@post.User.Username</h4>
-        <p>@post.Content</p>
-        @if (!string.IsNullOrEmpty(post.OriginalImageUrl))
-        {
-            <img src="@post.OriginalImageUrl"
-                 alt="Post image"
-                 style="max-width: 500px;" />
-        }
-        <small>@post.CreatedAt.ToString("g")</small>
-    </div>
-}
-<script>
-    // Client-side code will handle all data fetching
-    const token = '@ViewBag.JwtToken';
-
-    async function loadPosts() {
-        const response = await fetch('/api/posts', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'X-Screen-Width': window.screen.width,
-                'X-Screen-Height': window.screen.height
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Store token from ViewBag
+            const token = "@ViewBag.Token";
+            if (token) {
+                localStorage.setItem("token", token);
+                loadPosts();
+            } else {
+                window.location.href = "/Account/Login";
             }
         });
-        // ... render posts
-    }
 
-    document.addEventListener('DOMContentLoaded', loadPosts);
-</script>
+        async function loadPosts() {
+            try {
+                const response = await fetch('/api/posts', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'X-Screen-Width': window.screen.width,
+                        'X-Screen-Height': window.screen.height
+                    }
+                });
+
+                if (response.ok) {
+                    const posts = await response.json();
+                    renderPosts(posts);
+                } else if (response.status === 401) {
+                    window.location.href = "/Account/Login";
+                }
+            } catch (error) {
+                console.error("Error loading posts:", error);
+            }
+        }
+
+        function renderPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = posts.map(post => `
+                <div class="post">
+                    <h4>${post.AuthorName}</h4>
+                    <p>${post.Content}</p>
+                    ${post.ImageUrl ? `<img src="${post.ImageUrl}" style="max-width: 500px;">` : ''}
+                    <small>${post.CreatedAt}</small>
+                </div>
+            `).join('');
+        }
+    </script>
+}

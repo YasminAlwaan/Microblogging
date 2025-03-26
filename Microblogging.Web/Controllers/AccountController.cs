@@ -6,6 +6,9 @@ using System.Security.Claims;
 using Microblogging.Web.Models;
 using Microblogging.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 public class AccountController : Controller
 {
@@ -36,7 +39,7 @@ public class AccountController : Controller
             var users = new Dictionary<string, string>
             {
                 {"user1", "password1"},
-                {"user2", "password2"}
+              
             };
 
             if (users.TryGetValue(model.Username, out var password) &&
@@ -48,20 +51,20 @@ public class AccountController : Controller
                     new Claim(ClaimTypes.Name, model.Username)
                 };
 
-                var identity = new ClaimsIdentity(claims,
-                    CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                // Generate JWT token using _config
+                var key = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = model.RememberMe
-                };
+                var token = new JwtSecurityToken(
+                    issuer: _config["Jwt:Issuer"],
+                    audience: _config["Jwt:Audience"],
+                    claims: claims,
+                    expires: DateTime.Now.AddHours(1),
+                    signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                );
 
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    principal,
-                    authProperties);
-
+                // return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token) });
+                TempData["JwtToken"] = new JwtSecurityTokenHandler().WriteToken(token);
                 return RedirectToAction("Index", "Posts");
             }
 

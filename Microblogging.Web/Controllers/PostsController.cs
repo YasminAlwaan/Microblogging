@@ -1,4 +1,5 @@
-﻿using Microblogging.Core;
+﻿using Azure;
+using Microblogging.Core;
 using Microblogging.Core.Models;
 using Microblogging.Data;
 using Microblogging.Web.Models;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 
 namespace Microblogging.Web.Controllers
 {
-    [Authorize]
+  
     public class PostsController : Controller
     {
         private readonly IPostService _postService;
@@ -20,14 +21,23 @@ namespace Microblogging.Web.Controllers
             _postService = postService;
             _logger = logger;
         }
-
-        // GET: api/posts
-        [HttpGet]
+      
         public async Task<IActionResult> Index()
+        {
+            // Pass token to view for JavaScript usage
+            ViewBag.Token = TempData["JwtToken"]?.ToString();
+
+            // Get posts for server-side rendering (optional)
+          //  var posts = await _postService.GetTimelineAsync();
+            return View();
+        }
+
+        [Authorize]
+        [HttpGet("api/posts")]
+        public async Task<IActionResult> GetPosts()
         {
             try
             {
-
                 var posts = await _postService.GetTimelineAsync();
 
                 // Get client dimensions from headers 
@@ -43,9 +53,8 @@ namespace Microblogging.Web.Controllers
                     ImageUrl = GetOptimalImageUrl(p, screenWidth, screenHeight),
                     Location = $"{p.Latitude:F2}, {p.Longitude:F2}"
                 });
-                ViewBag.JwtToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-                return Ok(response);
+                return Ok(response); // Pure JSON response
             }
             catch (Exception ex)
             {
@@ -53,7 +62,6 @@ namespace Microblogging.Web.Controllers
                 return StatusCode(500, new { Message = "An error occurred while loading posts." });
             }
         }
-
         public int GetHeaderValue(string header, int defaultValue)
         {
             if (Request.Headers.TryGetValue(header, out var value) &&

@@ -12,9 +12,15 @@ namespace Microblogging.Web.Services
 
         public AzureBlobStorage(IConfiguration config)
         {
-            _blobServiceClient = new BlobServiceClient(
-                config["AzureStorage:ConnectionString"]);
-            _containerName = config["AzureStorage:ContainerName"];
+            var connectionString = config["AzureStorage:ConnectionString"];
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new ArgumentException("Azure Storage connection string is not configured");
+            }
+
+            _blobServiceClient = new BlobServiceClient(connectionString);
+            _containerName = config["AzureStorage:ContainerName"] ?? "posts";
         }
 
         public async Task<string> StoreImage(Stream imageStream, string fileName)
