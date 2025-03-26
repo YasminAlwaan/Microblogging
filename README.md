@@ -23,6 +23,9 @@ The app will be available at https://localhost:5001
 SQL Server
 sqllocaldb create "MicrobloggingDB"
 sqllocaldb start "MicrobloggingDB"
+
+5 username :"admin",
+ Password : "p@sword"
 #Migrations
 Apply migrations:
 dotnet ef database update --project Microblogging.Data
